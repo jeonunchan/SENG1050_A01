@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -208,9 +209,66 @@ int main(void)
 	struct FlightNode* destinationTail = NULL;
 	float fareInput;
 
+	char destinationBuffer[100];
+	char dateBuffer[100];
+
+
 	while (1)
 	{
-		// input data loop
+		if (fgets(destinationBuffer, sizeof(destinationBuffer), stdin) == NULL)
+		{
+			break;
+		}
+
+		int i = 0;
+		while (destinationBuffer[i] != '\0')
+		{
+			if (destinationBuffer[i] == '\n')
+			{
+				destinationBuffer[i] = '\0';
+				break;
+			}
+			i++;
+		}
+
+		if (strcmp(destinationBuffer, ".") == 0)
+		{
+			break;
+		}
+
+
+		if (fgets(dateBuffer, sizeof(dateBuffer), stdin) == NULL)
+		{
+			break;
+		}
+
+		int j = 0;
+		while (dateBuffer[j] != '\0')
+		{
+			if (dateBuffer[j] == '\n')
+			{
+				dateBuffer[j] = '\0';
+				break;
+			}
+			j++;
+		}
+
+		if (strcmp(dateBuffer, ".") == 0)
+		{
+			break;
+		}
+
+
+		if (scanf("%f", &fareInput) != 1)
+		{
+			break;
+		}
+
+		while (getchar() != '\n');
+
+		insertByDestination(&destinationHead, &destinationTail, destinationBuffer, dateBuffer, fareInput);
+		insertByFare(&fareHead, &fareTail, destinationBuffer, dateBuffer, fareInput);
+
 	}
 
 	printList(fareHead);
