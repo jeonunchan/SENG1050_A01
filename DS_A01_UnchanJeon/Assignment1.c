@@ -35,12 +35,16 @@ struct FlightNode* createNewNode(char* destination, char* date, float fare)
 
 	if (newNode == NULL)
 	{
-		printf("Error: No Memory");
 		exit(EXIT_FAILURE);
 	}
 
 	newNode->flight.destination = (char*)malloc(strlen(destination) + 1);
 	newNode->flight.date = (char*)malloc(strlen(date) + 1);
+	
+	if (newNode->flight.destination == NULL || newNode->flight.date == NULL)
+	{
+		exit(EXIT_FAILURE);
+	}
 
 	strcpy(newNode->flight.destination, destination);
 	strcpy(newNode->flight.date, date);
@@ -76,7 +80,7 @@ void deleteNode(struct FlightNode* node, struct FlightNode** head, struct Flight
 
 	if (node == *head)
 	{
-		*head == node->next;
+		*head = node->next;
 	}
 	if (node == *tail)
 	{
@@ -110,7 +114,7 @@ void insertByDestination(struct FlightNode** head, struct FlightNode** tail, cha
 
 	struct FlightNode* current = *head;
 
-	while (current != NULL && strcmp(current->flight.destination, newNode->flight.destination) < 0)
+	while (current != NULL && strcmp(current->flight.destination, newNode->flight.destination) <= 0)
 	{
 		current = current->next;
 	}
@@ -274,7 +278,67 @@ int main(void)
 	printList(fareHead);
 	printList(destinationHead);
 
-	// search and update(delete and create) process
+
+	char findDestination[100];
+	char findDate[100];
+
+	if (fgets(findDestination, sizeof(findDestination), stdin) != NULL && fgets(findDate, sizeof(findDate), stdin) != NULL)
+	{
+		int k = 0;
+		while (findDestination[k] != '\0')
+		{
+			if (findDestination[k] == '\n')
+			{
+				findDestination[k] = '\0';
+				break;
+			}
+			k++;
+		}
+		int l = 0;
+		while (findDate[l] != '\0')
+		{
+			if (findDate[l] == '\n')
+			{
+				findDate[l] = '\0';
+				break;
+			}
+			l++;
+		}
+
+		struct FlightNode* matchNode = findFlight(destinationHead, findDestination, findDate);
+
+		if (matchNode != NULL)
+		{
+			float oldFare = matchNode->flight.fare;
+			float newFare;
+
+			printf("Current fare: %f\n", oldFare);
+			if (scanf("%f", &newFare) == 1)
+			{
+				if (newFare == oldFare)
+				{
+					printf("Fare is unchanged.\n");
+				}
+				else
+				{
+					matchNode->flight.fare = newFare;
+
+					struct FlightNode* fareNodeUpdate = findFlight(fareHead, findDestination, findDate);
+					if (fareNodeUpdate != NULL)
+					{
+						deleteNode(fareNodeUpdate, &fareHead, &fareTail);
+						insertByFare(&fareHead, &fareTail, findDestination, findDate, newFare);
+					}
+				}
+			}
+			while (getchar() != '\n');
+		}
+		else 
+		{
+			printf("There is not an exact match.\n");
+		}
+
+	}
 
 	printList(fareHead);
 	printList(destinationHead);
